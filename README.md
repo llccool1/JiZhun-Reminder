@@ -9,6 +9,7 @@
 - 🔄 **多样化周期**：支持单次、每 N 分钟、每 N 小时、每 N 天、每天、每周等循环。
 - 🛡️ **现代系统适配**：深度适配 Win10/Win11 原生 XAML 系统托盘架构（点 X 隐藏、退出干净无残留）；原生 Mutex 单实例防多开。
 - 🚀 **开机自启动**：基于注册表 Run 项一键勾选开关，无需管理员提权。
+<img width="1142" height="472" alt="image" src="https://github.com/user-attachments/assets/4f20271a-7805-4b83-a09f-06470e468e0f" />
 
 ## 📦 打包编译
 ```bash
