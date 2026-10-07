@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-极准定时提醒 v20260930
+极准定时提醒 v20261007
+
+更新记录（v20261007）:
+  [修] 提醒弹窗去掉 60 秒自动关闭：显示器休眠时触发的提醒，用户亮屏后弹窗仍在，
+       需手动点"我知道了"才消失
+  [新] 提醒列表右键菜单：编辑 / 删除 / 完成 / 启用（按选中项状态自动灰掉不可用项）
 
 更新记录（v20260930）:
   [修1] _next_fire/_should_fire 改用锚定数学公式 O(1)，不再从 base 循环累加
@@ -72,7 +77,7 @@ except Exception:
 
 
 APP_TITLE   = "极准定时提醒"
-APP_VERSION = "v20260930"
+APP_VERSION = "v20261007"
 AUTOSTART_KEY_NAME = "JiZhunReminder_AutoStart"
 PREVIEW_ALIAS = "jizhun_preview"   # 试听专用 MCI 别名，不干扰提醒铃声
 
