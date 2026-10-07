@@ -1173,6 +1173,7 @@ class ReminderApp(_BaseTk):
         self.tree.bind("<Double-1>", lambda _e: self.edit_selected())
         self.tree.bind("<Return>",   lambda _e: self.edit_selected())
         self.tree.bind("<Delete>",   lambda _e: self.delete_selected())
+        self.tree.bind("<Button-3>", self._show_context_menu)
 
         bottom_box = TTK.Frame(container)
         bottom_box.pack(fill="x", pady=(6, 0))
@@ -1372,6 +1373,37 @@ class ReminderApp(_BaseTk):
         self.save()
         self.manager.update_reminders(self.reminders)
         self.refresh()
+
+    def _show_context_menu(self, event):
+        """[新] 提醒列表右键菜单：编辑 / 删除 / 完成 / 启用"""
+        iid = self.tree.identify_row(event.y)
+        if iid and iid not in self.tree.selection():
+            self.tree.selection_set(iid)
+            self.tree.focus(iid)
+        sel = self.tree.selection()
+        if not sel:
+            return
+        any_enabled = any_disabled = False
+        for rid in sel:
+            r = self.reminders.get(rid)
+            if r is None:
+                continue
+            if r.get("disabled"):
+                any_disabled = True
+            else:
+                any_enabled = True
+        menu = tk.Menu(self, tearoff=0)
+        menu.add_command(label="编辑", command=self.edit_selected)
+        menu.add_command(label="删除", command=self.delete_selected)
+        menu.add_separator()
+        menu.add_command(label="完成", command=lambda: self.set_done(True),
+                         state="normal" if any_enabled else "disabled")
+        menu.add_command(label="启用", command=lambda: self.set_done(False),
+                         state="normal" if any_disabled else "disabled")
+        try:
+            menu.tk_popup(event.x_root, event.y_root)
+        finally:
+            menu.grab_release()
 
     def edit_selected(self):
         sel = self.tree.selection()
