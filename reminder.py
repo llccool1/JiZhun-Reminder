@@ -18,6 +18,8 @@
   [新] 轻量现代化：ttkbootstrap 主题（flatly/darkly），跟随 Windows 系统深浅色，
        菜单可手动切换；弹窗配色随主题自动适配。未安装 ttkbootstrap 时自动回退
        原生 clam 风格，功能不受影响。
+  [新] 图标支持：打包时用 --icon app.ico 嵌入 exe 图标；窗口图标和托盘图标自动
+       查找 app.ico（打包内置 → exe 旁边 → 源码旁边），找不到则用内置绘制图标。
 
 依赖（可选，未安装不影响运行）:
   pip install ttkbootstrap tkcalendar
@@ -503,7 +505,8 @@ def show_stylish_popup(master, title, message, hint="", sound_path="",
 
         w.bind("<Return>", lambda _e: on_close())
         w.bind("<Escape>", lambda _e: on_close())
-        w.after(60000, lambda: w.destroy() if w.winfo_exists() else None)
+        # [修] 去掉 60 秒自动关闭：显示器休眠时触发的提醒，用户亮屏后弹窗必须还在，
+        # 等用户点"我知道了"才消失。自动关闭会导致休眠期间的提醒直接丢失。
         w.focus_force()
 
     except Exception as exc:
@@ -813,6 +816,21 @@ class ReminderDialog(tk.Toplevel):
 _BaseTk = TTK.Window if HAVE_BOOTSTRAP else tk.Tk
 
 
+def _icon_file():
+    """查找 app.ico：打包内置(sys._MEIPASS) → exe 旁边 → 源码旁边"""
+    candidates = []
+    meipass = getattr(sys, "_MEIPASS", None)
+    if meipass:
+        candidates.append(os.path.join(meipass, "app.ico"))
+    if getattr(sys, "frozen", False):
+        candidates.append(os.path.join(os.path.dirname(sys.executable), "app.ico"))
+    candidates.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "app.ico"))
+    for p in candidates:
+        if os.path.exists(p):
+            return p
+    return None
+
+
 class ReminderApp(_BaseTk):
 
     def __init__(self):
@@ -849,8 +867,8 @@ class ReminderApp(_BaseTk):
         self._start_clock()
 
     def _load_app_icon(self):
-        ico_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app.ico")
-        if os.path.exists(ico_path):
+        ico_path = _icon_file()
+        if ico_path:
             try:
                 self.iconbitmap(ico_path)
             except Exception:
@@ -968,8 +986,8 @@ class ReminderApp(_BaseTk):
         self.flash_status("已切换为深色模式" if self._dark_mode else "已切换为浅色模式")
 
     def _create_tray_icon_image(self):
-        ico_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app.ico")
-        if os.path.exists(ico_path):
+        ico_path = _icon_file()
+        if ico_path:
             try:
                 return Image.open(ico_path)
             except Exception:
